@@ -48,10 +48,10 @@ export const powerupTypes = [
     { name: 'Fast Ball', symbol: 'F', type: 'fastBall', color: '#FFFF00' }, 
     { name: 'Multi Ball', symbol: 'D', type: 'multiBall', color: '#00A4F9' }, 
     { name: 'Extend Paddle', symbol: 'E', type: 'widerPaddle', color: '#0000A8' }, 
-    { name: 'Laser Paddle', symbol: 'P', type: 'laser', color: '#AE0000' }, 
+    { name: 'Laser Paddle', symbol: 'L', type: 'laser', color: '#AE0000' }, 
     { name: 'Catch Paddle', symbol: 'C', type: 'catch', color: '#00A400' }, 
     { name: 'Break Ball', symbol: 'B', type: 'break', color: '#FC74B4' }, 
-    { name: 'Extra Life', symbol: 'L', type: 'extraLife', color: '#737373' } 
+    { name: 'Extra Life', symbol: 'P', type: 'extraLife', color: '#737373' } 
 ];
 
 export const randomDroppableTypes = powerupTypes.filter(p => p.type !== 'extraLife' && p.type !== 'catch');
