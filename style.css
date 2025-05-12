@@ -1,0 +1,312 @@
+/* DESIGN INTENT: Basic styling to remove default browser margins/padding and set up a dark background for the game. touch-action: none is crucial for preventing default mobile browser touch behaviors like scrolling/zooming. */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* DESIGN INTENT: Container to hold the game canvas and UI elements, providing relative positioning for overlay screens. */
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* DESIGN INTENT: The main game rendering surface. Set to block display and full size to fill the container. z-index ensures it's layered correctly behind UI screens. */
+        #gameCanvas {
+            background-color: #111;
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: relative; /* Ensure position for z-index */
+            z-index: 1; /* Ensure canvas is behind menu screens */
+        }
+
+        /* DESIGN INTENT: Base styling for all overlay screens (start, game over, pause, etc.). Positioned absolutely to cover the whole container, centered content, semi-transparent background, high z-index to appear on top. */
+        #startScreen, #gameOverScreen, #winScreen, #pauseScreen, #highScores, #settingsScreen, #infoScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 100; /* Increased z-index to ensure it's on top */
+            text-align: center;
+             padding: 20px; /* Add some padding */
+             overflow-y: auto; /* Allow scrolling on info screen */
+        }
+
+        /* DESIGN INTENT: Hide most screens by default, they will be shown/hidden by JavaScript. */
+        #pauseScreen, #gameOverScreen, #winScreen, #highScores, #settingsScreen, #infoScreen {
+            display: none;
+        }
+
+        #infoScreen .screen-title {
+            margin-bottom: 1rem; /* Smaller margin for info screen title */
+        }
+
+
+        /* DESIGN INTENT: Styling for screen titles, making them prominent. */
+        .screen-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+
+        /* DESIGN INTENT: Styling for interactive buttons on the screens. Green background, white text, rounded corners. */
+        .game-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .game-btn:active {
+            background-color: #3e8e41;
+        }
+
+         /* DESIGN INTENT: HUD (Heads-Up Display) to show score, lives, and level during gameplay. Positioned at the top, uses grid for layout, pointer-events: none allows clicks/touches to pass through to the canvas/paddle below. */
+         #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: grid;
+             grid-template-columns: repeat(3, 1fr);
+             grid-template-rows: auto auto;
+            align-items: start;
+            z-index: 5;
+            pointer-events: none;
+            gap: 5px 10px;
+         }
+
+         /* DESIGN INTENT: Grid positioning for individual HUD elements. */
+         #hud #scoreDisplay { grid-column: 1 / 2; grid-row: 1 / 2; justify-self: start;}
+         #hud #livesDisplay { grid-column: 2 / 3; grid-row: 1 / 2; justify-self: center;}
+         #hud #levelDisplay { grid-column: 3 / 4; grid-row: 1 / 2; justify-self: end;}
+         /* DESIGN INTENT: Display the current level concept (e.g., "Arkanoid Style") below the main stats. */
+         #hud #aestheticDisplay { grid-column: 1 / 4; grid-row: 2 / 3; justify-self: center; font-size: 1rem; color: #ccc; text-shadow: 1px 1px 1px #000;}
+
+
+        /* DESIGN INTENT: Styling for the text within the HUD. */
+        #scoreDisplay, #livesDisplay, #levelDisplay, #aestheticDisplay {
+            font-size: 1.2rem;
+            color: white;
+            text-shadow: 1px 1px 1px #000;
+        }
+
+        /* DESIGN INTENT: Pause button positioned in the top-right. Higher z-index than HUD so it's clickable. */
+        #pauseBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            z-index: 6;
+            pointer-events: auto;
+        }
+
+        /* DESIGN INTENT: Upgrade screen elements are explicitly hidden as this version doesn't use a selection screen. */
+        #upgradeScreen {
+            display: none; /* Not used in this Arkanoid version for selection */
+        }
+
+        .upgrade-title {
+             display: none;
+        }
+
+        .upgrade-options {
+             display: none;
+        }
+
+        .upgrade-btn {
+             display: none;
+        }
+
+
+        /* DESIGN INTENT: Base styling for falling powerups. Arkanoid powerups are drawn as capsules in the JS, but this provides base positioning and z-index. */
+        .powerup {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%; /* Arkanoid powerups are capsules, will draw differently */
+            z-index: 2;
+        }
+
+        /* DESIGN INTENT: Styling for the high scores list within the high scores screen. */
+        #highScoresList {
+            list-style-type: none;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        /* DESIGN INTENT: Styling for individual high score entries, using flexbox to space elements. */
+        #highScoresList li {
+            padding: 8px 5px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        #highScoresList li:last-child {
+            border-bottom: none;
+        }
+
+         /* DESIGN INTENT: Boss HP bar is not used in this Arkanoid structure, so it's hidden. */
+         #bossHPBar {
+            display: none; /* No boss in this structure */
+         }
+
+         #bossHPBarFill {
+             display: none;
+         }
+
+         /* DESIGN INTENT: Container for laser beam elements, positioned to cover the game area, pointer-events: none allows interaction behind it. */
+         #laserBeams {
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             pointer-events: none;
+             z-index: 4;
+         }
+
+         /* DESIGN INTENT: Base styling for laser beams (drawn as rectangles in JS). */
+         .laser {
+             position: absolute;
+             bottom: 40px; /* Start just above the paddle */
+             width: 4px;
+             background-color: red; /* Laser color */
+         }
+
+         /* DESIGN INTENT: Styling for labels in the settings screen. */
+         #settingsScreen label {
+             margin-bottom: 10px;
+         }
+
+         /* DESIGN INTENT: Styling for the level selection input in developer mode. */
+         #levelSelectInput {
+             margin-top: 10px;
+             padding: 8px;
+             font-size: 1rem;
+             border-radius: 4px;
+             border: 1px solid #ccc;
+             width: 80px;
+             text-align: center;
+             margin-bottom: 20px;
+         }
+
+         /* DESIGN INTENT: Text indicator for when developer mode is active. Hidden by default. */
+         #developerModeText {
+             position: absolute;
+             top: 50px; /* Adjust position as needed */
+             font-size: 1rem;
+             color: #00FF00; /* Green text for dev mode */
+             text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+             display: none; /* Hidden by default */
+             z-index: 11; /* Above other screens */
+         }
+
+          /* DESIGN INTENT: Container for the powerup information list in the info screen. Uses grid for layout. */
+          #powerupInfoList {
+              width: 90%;
+              max-width: 400px;
+              margin: 20px auto;
+              text-align: left; /* Align powerup info left */
+              display: grid; /* Use grid for layout */
+              grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* 3 columns, adjusting width */
+              gap: 15px; /* Space between grid items */
+              justify-items: center; /* Center items in the grid cells */
+          }
+
+          /* DESIGN INTENT: Styling for individual powerup items in the info list, making them look like clickable cards. */
+          #powerupInfoList .powerup-item { /* Apply class for better styling */
+              display: flex;
+              flex-direction: column; /* Stack symbol and text */
+              align-items: center; /* Center content */
+              padding: 10px;
+              border: 1px solid #555;
+              border-radius: 5px;
+              background-color: rgba(255, 255, 255, 0.1);
+              cursor: pointer; /* Indicate clickable */
+              transition: background-color 0.2s;
+          }
+
+           #powerupInfoList .powerup-item:active {
+               background-color: rgba(255, 255, 255, 0.2);
+           }
+
+          /* DESIGN INTENT: Styling for the powerup symbol within the info item. */
+          #powerupInfoList .powerup-item span:first-child { /* Symbol */
+              font-size: 1.8rem; /* Larger symbol */
+              margin-bottom: 5px;
+               line-height: 1; /* Adjust line height */
+          }
+
+           /* DESIGN INTENT: Styling for the powerup name within the info item. */
+           #powerupInfoList .powerup-item span:last-child { /* Name */
+              font-size: 0.9rem;
+              font-weight: bold;
+              text-align: center;
+           }
+
+
+           /* DESIGN INTENT: Window to display detailed description of a selected powerup. Hidden by default, positioned above the bottom, centered horizontally. */
+           #powerupDescriptionWindow {
+               position: absolute;
+               bottom: 20%; /* Position above the bottom */
+               left: 50%;
+               transform: translate(-50%, 0);
+               width: 90%;
+               max-width: 300px;
+               background-color: rgba(0, 0, 0, 0.9);
+               border: 2px solid #fff;
+               border-radius: 8px;
+               padding: 15px;
+               z-index: 12; /* Above info screen */
+               display: none; /* Hidden by default */
+               text-align: center;
+           }
+
+           #powerupDescriptionWindow h4 {
+               margin-top: 0;
+               margin-bottom: 10px;
+               color: #fff;
+           }
+
+           #powerupDescriptionWindow p {
+               margin-bottom: 0;
+               font-size: 0.9rem;
+               color: #ccc;
+           } 

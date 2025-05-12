@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arkanoid-style Brick Breaker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="laserBeams"></div>
+        <div id="hud">
+            <div id="scoreDisplay">Score: 0</div>
+            <div id="livesDisplay">Lives: 3</div>
+            <div id="levelDisplay">Level: 1</div>
+             <div id="aestheticDisplay">Arkanoid Style</div>
+         </div>
+
+         <div id="bossHPBar">
+             <div id="bossHPBarFill"></div>
+         </div>
+
+        <button id="pauseBtn">II</button>
+
+        <div id="startScreen">
+            <h1 class="screen-title">BRICK BREAKER</h1>
+             <div id="developerModeText">DEVELOPER MODE</div>
+             <button id="startBtn" class="game-btn">START GAME</button>
+             <div id="levelSelectContainer">
+                 <label for="levelSelectInput" style="display: none;">Select Level:</label>
+                 <input type="number" id="levelSelectInput" min="1" value="1" style="display: none;">
+             </div>
+
+            <button id="highScoreBtn" class="game-btn">HIGH SCORES</button>
+            <button id="infoBtn" class="game-btn">HOW TO PLAY</button>
+            <button id="settingsBtn" class="game-btn">SETTINGS</button>
+         </div>
+
+        <div id="pauseScreen">
+            <h2 class="screen-title">PAUSED</h2>
+            <button id="resumeBtn" class="game-btn">RESUME</button>
+            <button id="restartBtn" class="game-btn">RESTART LEVEL</button>
+            <button id="menuBtn" class="game-btn">MAIN MENU</button>
+        </div>
+
+        <div id="gameOverScreen">
+            <h2 class="screen-title">GAME OVER</h2>
+            <div id="finalScore" class="screen-title" style="font-size: 1.5rem; margin-top: -10px;">Score: 0</div>
+            <button id="tryAgainBtn" class="game-btn">TRY AGAIN</button>
+            <button id="mainMenuGameOverBtn" class="game-btn">MAIN MENU</button>
+         </div>
+
+        <div id="winScreen">
+            <h2 class="screen-title">LEVEL COMPLETE!</h2>
+             <p id="levelCompleteMessage" style="font-size: 1.2rem; margin-bottom: 20px;"></p>
+            <button id="nextLevelBtn" class="game-btn">NEXT LEVEL</button>
+        </div>
+
+        <div id="upgradeScreen">
+            <h2 class="upgrade-title">Power-up!</h2>
+             <p>You got a power-up!</p>
+             {/* Power-up name could be displayed here */}
+        </div>
+
+        <div id="highScores">
+            <h2 class="screen-title">HIGH SCORES</h2>
+            <ul id="highScoresList">
+                </ul>
+            <button id="backToMenuBtn" class="game-btn">BACK</button>
+        </div>
+
+         <div id="settingsScreen">
+             <h2 class="screen-title">SETTINGS</h2>
+              <label>
+                  Developer Mode:
+                 <input type="checkbox" id="developerModeToggle">
+              </label>
+              <button id="backToSettingsMenuBtn" class="game-btn">BACK</button>
+         </div>
+
+         <div id="infoScreen">
+             <h2 class="screen-title">HOW TO PLAY</h2>
+              <p style="margin-bottom: 20px; font-size: 1rem;">Break all the colored and silver bricks to clear the level!</p>
+              <div id="powerupInfoList">
+                  </div>
+               <div id="powerupDescriptionWindow">
+                   <h4></h4>
+                   <p></p>
+               </div>
+              <button id="backToInfoMenuBtn" class="game-btn">BACK</button>
+         </div>
+    </div>
+
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
