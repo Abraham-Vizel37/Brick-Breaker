@@ -70,7 +70,7 @@ export function updateHUD() {
     if(scoreDisplay) scoreDisplay.textContent = `Score: ${gameState.score}`;
     if(livesDisplay) livesDisplay.textContent = `Lives: ${gameState.lives}`;
     if(levelDisplay) levelDisplay.textContent = `Level: ${gameState.level}`;
-    if(aestheticDisplay) aestheticDisplay.textContent = gameState.currentLevelConcept;
+    // if(aestheticDisplay) aestheticDisplay.textContent = gameState.currentLevelConcept; // Removed display of level concept
 }
 
 export function updateBossHPBar() {

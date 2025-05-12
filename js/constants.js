@@ -4,11 +4,11 @@ export const settings = {
     paddleHeight: 16, 
     paddleWidth: 100, 
     ballRadius: 5, 
-    baseBallSpeed: 6, 
+    baseBallSpeed: 4, 
     ballSpeedMultiplier: 1, // DEPRECATED: Replaced by activeSpeedModifier.
     ballDamage: 1, 
-    randomPowerupChance: 0.03, 
-    extraLifeDropChance: 0.01, 
+    randomPowerupChance: 0.05, 
+    extraLifeDropChance: 0.02, 
     powerupSpeed: 1.5, 
     powerupDuration: 10000, 
     laserDuration: 8000, 
@@ -22,7 +22,7 @@ export const settings = {
     laserFireRate: 25, 
     laserHeight: 20, 
     laserXOffset: 0.1, 
-    totalLevelsCount: 40
+    totalLevelsCount: 35
 };
 
 export const colorPalettes = [
@@ -44,14 +44,14 @@ export const colorPalettes = [
 ];
 
 export const powerupTypes = [
-    { name: 'Slow Ball', symbol: 'S', type: 'slowBall', color: '#AED6F1' }, 
+    { name: 'Slow Ball', symbol: 'S', type: 'slowBall', color: '#F78100' }, 
     { name: 'Fast Ball', symbol: 'F', type: 'fastBall', color: '#FFFF00' }, 
-    { name: 'Multi Ball', symbol: 'D', type: 'multiBall', color: '#2196F3' }, 
-    { name: 'Extend Paddle', symbol: 'E', type: 'widerPaddle', color: '#4CAF50' }, 
-    { name: 'Laser Paddle', symbol: 'P', type: 'laser', color: '#FF9800' }, 
-    { name: 'Catch Paddle', symbol: 'C', type: 'catch', color: '#E91E63' }, 
-    { name: 'Break Ball', symbol: 'B', type: 'break', color: '#FF4500' }, 
-    { name: 'Extra Life', symbol: 'L', type: 'extraLife', color: '#FFFFFF' } 
+    { name: 'Multi Ball', symbol: 'D', type: 'multiBall', color: '#00A4F9' }, 
+    { name: 'Extend Paddle', symbol: 'E', type: 'widerPaddle', color: '#0000A8' }, 
+    { name: 'Laser Paddle', symbol: 'P', type: 'laser', color: '#AE0000' }, 
+    { name: 'Catch Paddle', symbol: 'C', type: 'catch', color: '#00A400' }, 
+    { name: 'Break Ball', symbol: 'B', type: 'break', color: '#FC74B4' }, 
+    { name: 'Extra Life', symbol: 'L', type: 'extraLife', color: '#737373' } 
 ];
 
 export const randomDroppableTypes = powerupTypes.filter(p => p.type !== 'extraLife' && p.type !== 'catch');
