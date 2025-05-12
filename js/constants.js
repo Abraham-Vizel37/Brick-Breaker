@@ -7,8 +7,8 @@ export const settings = {
     baseBallSpeed: 4, 
     ballSpeedMultiplier: 1, // DEPRECATED: Replaced by activeSpeedModifier.
     ballDamage: 1, 
-    randomPowerupChance: 0.05, 
-    extraLifeDropChance: 0.02, 
+    randomPowerupChance: 0.07, 
+    extraLifeDropChance: 0.05, 
     powerupSpeed: 1.5, 
     powerupDuration: 10000, 
     laserDuration: 8000, 
