@@ -577,7 +577,9 @@ export function setupEventListeners() {
 
     if (UI.menuBtn) {
         UI.menuBtn.addEventListener('click', () => {
-            resetGameState();
+            resetGameState(); // Reset everything
+            clearAllTimedPowerupEffects(gameState); // Ensure all powerup effects/timeouts are cleared
+            gameState.gameRunning = false; // Explicitly stop the game loop
             UI.showScreen(UI.startScreen);
             UI.updateHUD(); // Reset HUD display
         });
