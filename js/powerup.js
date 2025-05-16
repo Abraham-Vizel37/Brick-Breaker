@@ -58,7 +58,9 @@ export function handlePowerupDrop(brick, currentGameState) {
             x: brick.x + brick.width / 2,
             y: brick.y + brick.height / 2,
             type: brick.powerupType,
-            dy: settings.powerupSpeed
+            dy: settings.powerupSpeed,
+            width: 20,
+            height: 11
         };
         dropReason = 'Guaranteed';
     } else {
@@ -70,7 +72,9 @@ export function handlePowerupDrop(brick, currentGameState) {
                 x: brick.x + brick.width / 2,
                 y: brick.y + brick.height / 2,
                 type: 'extraLife',
-                dy: settings.powerupSpeed
+                dy: settings.powerupSpeed,
+                width: 20,
+                height: 11
             };
             dropReason = 'Random Life';
         } else {
@@ -83,7 +87,9 @@ export function handlePowerupDrop(brick, currentGameState) {
                     x: brick.x + brick.width / 2,
                     y: brick.y + brick.height / 2,
                     type: randomPowerupDef.type,
-                    dy: settings.powerupSpeed
+                    dy: settings.powerupSpeed,
+                    width: 20,
+                    height: 11
                 };
                 dropReason = 'Random Other';
             } else {

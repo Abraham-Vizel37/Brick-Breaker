@@ -40,6 +40,9 @@ export const colorPaletteSelect = document.getElementById('colorPaletteSelect');
 // Add reference to baseBallSpeed input
 export const baseBallSpeedInput = document.getElementById('baseBallSpeedInput');
 
+// Add reference to the color palette preview div
+export const colorPalettePreview = document.getElementById('colorPalettePreview');
+
 // UI Buttons (grouped for clarity)
 export const startBtn = document.getElementById('startBtn');
 export const highScoreBtn = document.getElementById('highScoreBtn');
@@ -66,6 +69,11 @@ export function showScreen(screenToShow) {
             screen.style.display = (screen === screenToShow) ? 'flex' : 'none';
         }
     });
+    if (screenToShow === settingsScreen) {
+         // Display the current color palette preview when settings screen is shown
+         const currentPalette = colorPalettes[gameState.currentColorPaletteIndex];
+         displayColorPalettePreview(currentPalette);
+     }
     if (bossHPBar && screenToShow !== gameOverScreen && screenToShow !== winScreen && screenToShow !== pauseScreen) { // Example condition for boss bar
          // bossHPBar.style.display = 'none'; // Keep boss bar hidden unless in active game
     }
@@ -308,10 +316,35 @@ export function populateColorPaletteSelect() {
         const selectedIndex = parseInt(event.target.value, 10);
         // Call a function in game.js to update the color palette
         // Assuming a function like updateColorPalette(selectedIndex) exists in game.js
-        // We'll need to add this function in game.js next.
-        // For now, we'll just log the change.
-        console.log("Color palette changed to index:", selectedIndex);
         // Placeholder for calling game logic:
         updateColorPalette(selectedIndex);
+        // Update the preview when the palette is changed
+        displayColorPalettePreview(colorPalettes[selectedIndex]);
+    });
+}
+
+// Function to display the color palette preview
+export function displayColorPalettePreview(palette) {
+    if (!colorPalettePreview) return;
+
+    // Clear previous preview
+    colorPalettePreview.innerHTML = '';
+
+    // Set display to flex for horizontal layout
+    colorPalettePreview.style.display = 'flex';
+    colorPalettePreview.style.flexDirection = 'row';
+    colorPalettePreview.style.marginTop = '10px'; // Add some space above the preview
+
+    // Create a block for each color in the palette (excluding silver and gold)
+    const standardColors = palette.colors.slice(0, 8);
+
+    standardColors.forEach(color => {
+        const colorBlock = document.createElement('div');
+        colorBlock.style.width = '30px';
+        colorBlock.style.height = '20px';
+        colorBlock.style.backgroundColor = color;
+        colorBlock.style.marginRight = '2px';
+        colorBlock.style.border = '1px solid #000'; // Add a border for visibility
+        colorPalettePreview.appendChild(colorBlock);
     });
 } 
