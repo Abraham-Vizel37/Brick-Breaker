@@ -2,27 +2,39 @@ import { settings } from './constants.js';
 import { paddle } from './paddle.js';
 import { handlePowerupDrop } from './powerup.js';
 import { playSound } from '../script.js';
+import { gameState } from './game.js'; // Assuming gameState is needed for powerup drops
 // gameState and its properties (balls, bricks, lasers, powerups, score, lives, level, etc.) 
 // will be passed as parameters to these collision functions.
 // uiUpdateCallback will be a function to call updateHUD, updateFinalScore etc.
 
+// Helper function to map brick type values (1-8) to their corresponding color from the current palette. (Moved to brick.js)
+// function getStandardBrickColor(typeValue, currentPalette) { ... }
+
+// Helper function to darken a given hex color by a specified amount (0-1). (Moved to brick.js)
+// function darkenColor(color, amount) { ... }
+
+// Helper function to lighten a given hex color by a specified amount (0-1). (Moved to brick.js)
+// function lightenColor(hex, percent) { ... }
+
+// Updated function to draw a diagonal sweep animation, with special handling for silver bricks (Moved to brick.js)
+// function drawMetallicSweepAnimation(ctx, brick, animationProgress, baseAppearanceColor, isSilverSpecialAnimation) { ... }
+
+// Helper to handle powerup dropping (This function is imported from powerup.js, remove local declaration)
+// function handlePowerupDrop(brick, currentGameState) { ... }
+
+// Refined checkBrickCollision function
 export function checkBrickCollision(ball, bricks, currentGameState, uiUpdateCallback, checkLevelCompletionCallback) {
     let anyBrickHit = false;
-    
-    for (let i = bricks.length - 1; i >= 0; i--) { // Iterate through ALL bricks
+    const hitBricks = new Set(); // Use a Set to store unique bricks hit in this frame
+
+    // Iterate through all bricks to find potential collisions
+    for (let i = bricks.length - 1; i >= 0; i--) { 
         const brick = bricks[i];
         if (brick.status === 1) { // Only check active bricks
 
-            // Simple AABB check first for broad phase
-            // (This initial check remains, but the response logic changes)
-            const brickLeft = brick.x;
-            const brickRight = brick.x + brick.width;
-            const brickTop = brick.y;
-            const brickBottom = brick.y + brick.height;
-
-            // Find the closest point to the circle (ball) on the rectangle (brick)
-            const closestX = Math.max(brickLeft, Math.min(ball.x, brickRight));
-            const closestY = Math.max(brickTop, Math.min(ball.y, brickBottom));
+            // Calculate the closest point to the circle (ball) on the rectangle (brick)
+            const closestX = Math.max(brick.x, Math.min(ball.x, brick.x + brick.width));
+            const closestY = Math.max(brick.y, Math.min(ball.y, brick.y + brick.height));
 
             // Calculate the distance between the circle's center and this closest point
             const distanceX = ball.x - closestX;
@@ -31,109 +43,93 @@ export function checkBrickCollision(ball, bricks, currentGameState, uiUpdateCall
 
             // If the distance is less than the square of the circle's radius, a collision occurred
             if (distanceSquared < (ball.radius * ball.radius)) {
-            
-                anyBrickHit = true;
-
-                playSound('brickHit');
-
-                // --- Animation Trigger ---
-                if (brick.isUnbreakable || (brick.originalColor === '#BCBCBC' && brick.maxHp > 1)) {
-                    brick.isHitAnimating = true;
-                    brick.hitAnimationStartTime = performance.now();
-                }
-                // --- End Animation Trigger ---
-
-                // --- Collision Response --- (Refined Bounce based on Normal)
+                // Collision detected with this brick
                 
-                // Calculate the distance from the ball center to the closest point on the brick border.
-                // This distance squared is already calculated (distanceSquared).
+                // --- Collision Response & State Update ---
 
-                // If the distance is less than the square of the circle's radius, a collision occurred
-                // The closest point logic inherently handles corners and sides.
-                // Special handling for distanceSquared === 0 (ball center exactly at closest point, likely inside brick)
-                 if (distanceSquared === 0) {
-                     // Ball is inside the brick. Attempt to push it out along its reversed velocity direction
-                     // or a default direction if velocity is zero.
-                     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-                     if (speed > 0) {
-                        // Push out along reversed velocity vector
-                        const pushAmount = ball.radius; // Push out at least ball radius
-                        ball.x -= (ball.dx / speed) * pushAmount;
-                        ball.y -= (ball.dy / speed) * pushAmount;
-
-                         // Then apply a standard reflection based on the *original* dominant axis of velocity
-                         // This is still a fallback for deep overlap, aiming for a reasonable bounce.
-                         if (Math.abs(ball.dx) > Math.abs(ball.dy)) {
-                             ball.dx = -ball.dx;
-                         } else {
-                             ball.dy = -ball.dy;
-                         }
-
-                     } else { // Speed is zero (ball perfectly centered or stuck)
-                         // Apply a default upward push and vertical bounce
-                         ball.y -= ball.radius * 2; // Nudge upwards
-                         ball.dy = -ball.dy || -settings.baseBallSpeed; // Reverse vertical or set default speed
-                     }
-
-                 } else { // Standard collision - distanceSquared > 0
-                     const distance = Math.sqrt(distanceSquared);
-                     // Collision normal is the vector from closestPoint to ball center, normalized
-                     const normalX = distanceX / distance;
-                     const normalY = distanceY / distance;
-
-                     // Reflect the ball's velocity using the collision normal
-                     const dotProduct = ball.dx * normalX + ball.dy * normalY;
-                     ball.dx = ball.dx - 2 * dotProduct * normalX;
-                     ball.dy = ball.dy - 2 * dotProduct * normalY;
-
-                     // Position correction: Move ball out of the brick along the normal
-                     const overlap = ball.radius - distance;
-                     const minPush = 0.1; // A small buffer to ensure separation
-                     const pushAmount = overlap + minPush; // Push out by overlap plus a small buffer
-                     ball.x += normalX * pushAmount;
-                     ball.y += normalY * pushAmount;
-                 }
-                 
-                let bounced = true; // Collision was handled, considered bounced for state update
-
-                // --- Brick State Update & Powerup Drop ---
-                if (brick.isUnbreakable) {
-                    if (ball.isBreak) {
-                         brick.status = 0; // Break ball destroys unbreakable
+                // If the ball is a break ball, it hits the brick but doesn't bounce normally.
+                // It destroys the brick and continues.
+                if (ball.isBreak) {
+                    // Process the current brick hit
+                    if (brick.isUnbreakable) {
+                         brick.status = 0; 
                          currentGameState.score += 500;
-                         if(uiUpdateCallback) uiUpdateCallback();
-                         handlePowerupDrop(brick, currentGameState);
-                         if(checkLevelCompletionCallback) checkLevelCompletionCallback();
-                    }
-                    // Normal ball just bounces off unbreakable bricks (handled by reflection above)
-
-                } else { // Breakable brick
-                    if (ball.isBreak) {
-                         brick.status = 0; // Break ball destroys breakable
+                    } else { 
+                         brick.status = 0;
                          currentGameState.score += 10;
-                         if(uiUpdateCallback) uiUpdateCallback();
-                         handlePowerupDrop(brick, currentGameState);
-                         if(checkLevelCompletionCallback) checkLevelCompletionCallback();
-                    } else {
-                        brick.hp -= ball.damage; // Normal ball damages breakable
-                        if (brick.hp <= 0) {
-                            brick.status = 0;
-                            currentGameState.score += 10;
-                            handlePowerupDrop(brick, currentGameState);
-                            if(checkLevelCompletionCallback) checkLevelCompletionCallback();
-                        }
+                    }
+                    if(uiUpdateCallback) uiUpdateCallback();
+                    handlePowerupDrop(brick, currentGameState);
+                    if(checkLevelCompletionCallback) checkLevelCompletionCallback();
+                    anyBrickHit = true; // Mark that a brick was hit
+
+                } else { // Standard ball collision (types 1-10)
+                    playSound('brickHit');
+
+                    // --- Animation Trigger ---
+                    if (brick.isUnbreakable || (brick.originalColor === '#BCBCBC' && brick.maxHp > 1)) {
+                         brick.isHitAnimating = true;
+                         brick.hitAnimationStartTime = performance.now();
+                    }
+                    // --- End Animation Trigger ---
+
+                    // Calculate collision normal (vector from closest point on brick to ball center)
+                    const distance = Math.sqrt(distanceSquared);
+                    let normalX = 0;
+                    let normalY = 0;
+
+                    if (distance > 0) { // Avoid division by zero if ball center is exactly on closest point
+                         normalX = distanceX / distance;
+                         normalY = distanceY / distance;
+                    } else { // Ball is exactly at the closest point (e.g., started inside)
+                        // This is a fallback; ideally position correction prevents this.
+                        // Use a simple upward normal for now.
+                        normalY = -1;
+                    }
+
+                    // Reflect the ball's velocity using the collision normal
+                    const dotProduct = ball.dx * normalX + ball.dy * normalY;
+                    // Only reflect if the ball is moving towards the brick
+                    if (dotProduct < 0) {
+                        ball.dx = ball.dx - 2 * dotProduct * normalX;
+                        ball.dy = ball.dy - 2 * dotProduct * normalY;
+                    }
+
+                    // Position correction: Move ball out of the brick along the normal
+                    const overlap = ball.radius - distance;
+                    // Ensure overlap is positive if a collision occurred
+                    if (overlap > 0) {
+                         const pushAmount = overlap + 0.1; // Push out by overlap plus a small buffer
+                         ball.x += normalX * pushAmount;
+                         ball.y += normalY * pushAmount;
+                    }
+
+                    // Process the current brick hit (HP loss, powerup, etc.)
+                    if (brick.isUnbreakable) {
+                       // Normal ball bounces off unbreakable, no HP loss or status change
+                    } else { 
+                       brick.hp -= ball.damage; // Normal ball damages breakable
+                       if (brick.hp <= 0) {
+                           brick.status = 0;
+                           currentGameState.score += 10;
+                           handlePowerupDrop(brick, currentGameState);
+                           if(checkLevelCompletionCallback) checkLevelCompletionCallback();
+                       }
                         if(uiUpdateCallback) uiUpdateCallback();
                     }
-                }
-                
-                // For non-break balls, only one brick is hit per frame and we stop checking
-                if (!ball.isBreak) {
-                     return true; // Indicate a collision was handled and ball bounced
+
+                    // For non-break balls, we stop after the first hit that causes a bounce.
+                    return true; 
                 }
             }
         }
     }
-    return anyBrickHit; // Returns true if *any* brick was hit (useful for break balls)
+
+    // If the loop finishes without a standard ball hitting a brick,
+    // check level completion based on any bricks potentially destroyed by break balls.
+    // The logic for break balls already calls handlePowerupDrop and checkLevelCompletionCallback individually.
+    // We only need to return if any brick was hit at all (for the game loop caller).
+    return anyBrickHit; 
 }
 
 export function checkLaserBrickCollision(lasers, bricks, currentGameState, uiUpdateCallback, checkLevelCompletionCallback) {
@@ -210,12 +206,15 @@ export function checkWallCollision(ball, canvas) {
        // playSound('wallBounce'); // Sound handled by game logic or a central sound manager if needed
     }
 
-    return false; // Indicate if ball went off bottom
+    return bounced;
 }
 
 export function checkPaddleCollision(ball, currentGameState) {
+    // Use the imported paddle object directly, not from gameState
+    // const paddle = currentGameState.paddle; // Removed
+
+    // Simplified AABB check with ball radius consideration
     if (ball.active && !ball.isOnPaddle) {
-        // Simplified AABB check with ball radius consideration
         if (ball.y + ball.radius > paddle.y &&
             ball.y - ball.radius < paddle.y + paddle.height &&
             ball.x + ball.radius > paddle.x && 
@@ -261,20 +260,20 @@ export function checkPaddleCollision(ball, currentGameState) {
 }
 
 export function checkPowerupPaddleCollision(powerup, currentGameState, applyPowerupCallback, uiUpdateCallback) {
-    // Simple AABB for powerup (center x, y) and paddle
-    const powerupHalfWidth = 20 / 2; // Powerup width from drawPowerups
-    const powerupHalfHeight = 11 / 2; // Powerup height from drawPowerups
+    // const paddle = currentGameState.paddle; // Removed this line
 
-    // Check for overlap
-    if (powerup.x + powerupHalfWidth > paddle.x &&
-        powerup.x - powerupHalfWidth < paddle.x + paddle.width &&
-        powerup.y + powerupHalfHeight > paddle.y &&
-        powerup.y - powerupHalfHeight < paddle.y + paddle.height) {
+    // Simple AABB collision detection
+    if (powerup.x < paddle.x + paddle.width &&
+        powerup.x + powerup.width > paddle.x &&
+        powerup.y < paddle.y + paddle.height &&
+        powerup.y + powerup.height > paddle.y) {
         
-        // Collision occurred
-        applyPowerupCallback(powerup.type, currentGameState, uiUpdateCallback);
-        // playSound('powerupCatch'); // Sound handled by applyPowerup or game logic
-        return true; // Collision occurred, powerup should be removed
+        // Collision detected with paddle
+        // console.log("Powerup collected:", powerup.type);
+        applyPowerupCallback(powerup.type, currentGameState);
+        if(uiUpdateCallback) uiUpdateCallback();
+        // playSound('powerupCollect'); // Assuming sound exists
+        return true; // Indicate powerup collected
     }
     return false; // No collision
 } 
