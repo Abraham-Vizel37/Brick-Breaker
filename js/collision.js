@@ -1,6 +1,7 @@
 import { settings } from './constants.js';
 import { paddle } from './paddle.js';
 import { handlePowerupDrop } from './powerup.js';
+import { playSound } from '../script.js';
 // gameState and its properties (balls, bricks, lasers, powerups, score, lives, level, etc.) 
 // will be passed as parameters to these collision functions.
 // uiUpdateCallback will be a function to call updateHUD, updateFinalScore etc.
@@ -20,6 +21,8 @@ export function checkBrickCollision(ball, bricks, currentGameState, uiUpdateCall
             ball.y - ball.radius < brick.y + brick.height) {
             
             anyBrickHit = true;
+
+            playSound('brickHit');
 
             // --- Animation Trigger ---
             // Trigger hit animation for Gold (unbreakable) or Silver bricks

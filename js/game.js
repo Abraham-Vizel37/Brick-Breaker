@@ -539,85 +539,128 @@ function loadDeveloperMode() {
 // --- Event Listener Setup ---
 // This function should be called once when the application starts.
 export function setupEventListeners() {
-    // UI Navigation Buttons
-    if (UI.startBtn) UI.startBtn.addEventListener('click', () => {
-        let levelToStart = 1;
-        if (gameState.developerMode && UI.levelSelectInput) {
-            const selectedLevel = parseInt(UI.levelSelectInput.value, 10);
-            if (!isNaN(selectedLevel) && selectedLevel >= 1 && selectedLevel <= settings.totalLevelsCount) {
-                levelToStart = selectedLevel;
-            } else {
-                alert(`Please enter a valid level number between 1 and ${settings.totalLevelsCount}.`);
-                return; 
-            }
-        }
-        startGameAtLevel(levelToStart);
-    });
-    if (UI.highScoreBtn) UI.highScoreBtn.addEventListener('click', () => {
-        const scores = loadHighScores();
-        UI.updateHighScoresListUI(scores);
-        UI.showScreen(UI.highScoresScreen);
-    });
-     if (UI.settingsBtn) UI.settingsBtn.addEventListener('click', () => {
-        UI.updateDeveloperModeUIState(gameState.developerMode); // Ensure checkbox reflects current state
-        UI.showScreen(UI.settingsScreen);
-    });
-    if (UI.infoBtn) UI.infoBtn.addEventListener('click', () => {
-        UI.populatePowerupInfoUI();
-        UI.hidePowerupDescription();
-        UI.showScreen(UI.infoScreen);
-    });
-    if (UI.backToMenuBtn) UI.backToMenuBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
-    if (UI.backToSettingsMenuBtn) UI.backToSettingsMenuBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
-    if (UI.backToInfoMenuBtn) UI.backToInfoMenuBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
-    if (UI.tryAgainBtn) UI.tryAgainBtn.addEventListener('click', () => startGameAtLevel(1));
-    if (UI.mainMenuGameOverBtn) UI.mainMenuGameOverBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
-    if (UI.menuBtn) UI.menuBtn.addEventListener('click', () => {
-        pauseGame(); // Ensure game is paused before showing menu
-        clearAllTimedPowerupEffects(gameState); // Clear effects when going to menu
-        gameState.gameRunning = false; // Explicitly stop game running flag
-        UI.showScreen(UI.startScreen);
-    });
-    if (UI.nextLevelBtn) UI.nextLevelBtn.addEventListener('click', startNextLevel);
-    
-    // Game Control Buttons
-    if (UI.pauseBtn) UI.pauseBtn.addEventListener('click', pauseGame);
-    if (UI.resumeBtn) UI.resumeBtn.addEventListener('click', resumeGame);
-    if (UI.restartBtn) UI.restartBtn.addEventListener('click', restartLevel);
-
-    // Canvas Input
+    // Prevent default touch behavior on the canvas
     if (UI.canvas) {
-        UI.canvas.addEventListener('click', handleCanvasClickOrTouch);
-        UI.canvas.addEventListener('touchstart', handleCanvasClickOrTouch, { passive: false });
+        UI.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); }, { passive: false });
+        UI.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+        UI.canvas.addEventListener('touchend', (e) => { e.preventDefault(); }, { passive: false });
+    }
+
+    // --- Screen Button Listeners ---
+    if (UI.startBtn) {
+        UI.startBtn.addEventListener('click', () => {
+            let levelToStart = 1;
+            if (gameState.developerMode && UI.levelSelectInput) {
+                const selectedLevel = parseInt(UI.levelSelectInput.value, 10);
+                if (!isNaN(selectedLevel) && selectedLevel >= 1 && selectedLevel <= settings.totalLevelsCount) {
+                    levelToStart = selectedLevel;
+                } else {
+                    alert(`Please enter a valid level number between 1 and ${settings.totalLevelsCount}.`);
+                    return; // Prevent game from starting with invalid input
+                }
+            }
+            startGameAtLevel(levelToStart);
+        });
+    }
+
+    if (UI.pauseBtn) {
+        UI.pauseBtn.addEventListener('click', pauseGame);
+    }
+
+    if (UI.resumeBtn) {
+        UI.resumeBtn.addEventListener('click', resumeGame);
+    }
+
+    if (UI.restartBtn) {
+        UI.restartBtn.addEventListener('click', restartLevel);
+    }
+
+    if (UI.menuBtn) {
+        UI.menuBtn.addEventListener('click', () => {
+            resetGameState();
+            UI.showScreen(UI.startScreen);
+            UI.updateHUD(); // Reset HUD display
+        });
+    }
+
+    if (UI.tryAgainBtn) {
+        UI.tryAgainBtn.addEventListener('click', () => startGameAtLevel(1));
+    }
+
+    if (UI.mainMenuGameOverBtn) {
+        UI.mainMenuGameOverBtn.addEventListener('click', () => {
+            resetGameState();
+            UI.showScreen(UI.startScreen);
+            UI.updateHUD(); // Reset HUD display
+        });
+    }
+
+    if (UI.nextLevelBtn) {
+        UI.nextLevelBtn.addEventListener('click', startNextLevel);
+    }
+
+    if (UI.highScoreBtn) {
+        UI.highScoreBtn.addEventListener('click', () => {
+            const scores = loadHighScores();
+            UI.updateHighScoresListUI(scores);
+            UI.showScreen(UI.highScoresScreen);
+        });
+    }
+
+    if (UI.backToMenuBtn) {
+        UI.backToMenuBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
+    }
+
+    if (UI.settingsBtn) {
+        UI.settingsBtn.addEventListener('click', () => {
+            UI.showScreen(UI.settingsScreen);
+        });
+    }
+
+    if (UI.backToSettingsMenuBtn) {
+        UI.backToSettingsMenuBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
+    }
+
+    if (UI.infoBtn) {
+        UI.infoBtn.addEventListener('click', () => {
+            UI.showScreen(UI.infoScreen);
+            UI.populatePowerupInfoUI(); // Populate powerup list when info screen is shown
+        });
+    }
+
+    if (UI.backToInfoMenuBtn) {
+        UI.backToInfoMenuBtn.addEventListener('click', () => UI.showScreen(UI.startScreen));
+    }
+
+    // --- Developer Mode Listeners ---
+    if (UI.developerModeToggle) {
+        UI.developerModeToggle.addEventListener('change', (event) => {
+            gameState.developerMode = event.target.checked;
+            saveDeveloperMode();
+            UI.updateDeveloperModeUIState(gameState.developerMode);
+        });
+    }
+
+    if (UI.levelSelectInput) {
+         UI.levelSelectInput.addEventListener('change', (event) => {
+             // Optional: Add validation or confirmation
+             console.log("Level select changed to:", event.target.value);
+         });
+    }
+
+    // --- In-Game Interaction Listeners ( delegated to canvas) ---
+    if (UI.canvas) {
         UI.canvas.addEventListener('mousemove', handleCanvasMouseMove);
         UI.canvas.addEventListener('mousedown', handleCanvasClickOrTouch);
         UI.canvas.addEventListener('mouseup', handleCanvasMouseUpOrLeave);
-        UI.canvas.addEventListener('mouseleave', handleCanvasMouseUpOrLeave);
-        UI.canvas.addEventListener('touchmove', handleCanvasTouchMove, { passive: false });
+        UI.canvas.addEventListener('mouseleave', handleCanvasMouseUpOrLeave); // Treat mouse leaving as mouse up
+
+        UI.canvas.addEventListener('touchmove', handleCanvasTouchMove);
+        UI.canvas.addEventListener('touchstart', handleCanvasClickOrTouch);
+        // touchend handled by touchend preventDefault above, might need specific logic later
     }
 
-    // Settings
-    if (UI.developerModeToggle) UI.developerModeToggle.addEventListener('change', (e) => {
-        gameState.developerMode = e.target.checked;
-        saveDeveloperMode();
-        UI.updateDeveloperModeUIState(gameState.developerMode);
-    });
-
-    // Powerup Info Screen Interaction
-    if (UI.powerupInfoList) UI.powerupInfoList.addEventListener('click', (e) => {
-        const item = e.target.closest('.powerup-item');
-        if (item && item.dataset.powerupType) {
-            UI.showPowerupDescription(item.dataset.powerupType);
-        }
-    });
-    if (UI.infoScreen) UI.infoScreen.addEventListener('click', (e) => {
-        if (UI.powerupDescriptionWindow && UI.powerupDescriptionWindow.style.display === 'block' && !UI.powerupDescriptionWindow.contains(e.target)) {
-            UI.hidePowerupDescription();
-        }
-    });
-    if (UI.powerupDescriptionWindow) UI.powerupDescriptionWindow.addEventListener('click', e => e.stopPropagation());
-
-    // Window Resize
+    // --- Window Resize Listener ---
     window.addEventListener('resize', handleResize);
 }
 

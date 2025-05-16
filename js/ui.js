@@ -131,8 +131,8 @@ export function updateDeveloperModeUIState(isDevMode) {
 
 // --- Powerup Info Screen ---
 export function populatePowerupInfoUI() {
-    if (!powerupInfoList || !powerupDescriptionWindow) {
-        console.error("Powerup info elements not found!");
+    if (!powerupInfoList || !powerupDescriptionWindow || !ctx) {
+        console.error("Powerup info elements or canvas context not found!");
         return;
     }
     powerupInfoList.innerHTML = ''; 
@@ -142,18 +142,72 @@ export function populatePowerupInfoUI() {
         infoItem.classList.add('powerup-item');
         infoItem.dataset.powerupType = p.type;
 
-        const symbolElement = document.createElement('span');
-        symbolElement.textContent = p.symbol;
-        symbolElement.style.color = p.color;
-        symbolElement.style.textShadow = '1px 1px 2px #000';
+        // Create a small canvas to draw the powerup shape
+        const powerupCanvas = document.createElement('canvas');
+        const canvasSize = 40; // Size of the mini canvas
+        powerupCanvas.width = canvasSize;
+        powerupCanvas.height = canvasSize;
+        const powerupCtx = powerupCanvas.getContext('2d');
+
+        // Draw the powerup shape (capsule) on the mini canvas
+        if (powerupCtx) {
+            // Use dimensions similar to the in-game powerups (adjust as needed for mini canvas scale)
+            const powerupWidth = 20 * (canvasSize / 40); // Scale based on canvas size
+            const powerupHeight = 11 * (canvasSize / 40); // Scale based on canvas size
+            const powerupX = (canvasSize - powerupWidth) / 2;
+            const powerupY = (canvasSize - powerupHeight) / 2;
+
+            powerupCtx.fillStyle = p.color;
+            powerupCtx.shadowColor = 'rgba(0,0,0,0.5)';
+            powerupCtx.shadowBlur = 3;
+            powerupCtx.shadowOffsetX = 2;
+            powerupCtx.shadowOffsetY = 2;
+
+            // Draw rectangle shape
+            powerupCtx.fillRect(powerupX, powerupY, powerupWidth, powerupHeight);
+
+            // Draw stroke
+            powerupCtx.strokeStyle = '#000';
+            powerupCtx.lineWidth = 0.5 * (canvasSize / 40); // Scale stroke width
+            powerupCtx.strokeRect(powerupX, powerupY, powerupWidth, powerupHeight);
+
+            // Draw the powerup symbol on top
+            powerupCtx.fillStyle = 'white'; // Symbol color
+            // Use font size and stroke similar to in-game powerups
+            const symbolFontSize = 11 * (canvasSize / 40); // Scale font size
+            powerupCtx.font = `bold ${symbolFontSize}px Arial`;
+            powerupCtx.textAlign = 'center';
+            powerupCtx.textBaseline = 'middle';
+            // Clear shadows for text
+            powerupCtx.shadowColor = 'transparent';
+            const symbolTextY = canvasSize / 2 + (symbolFontSize * 0.1); // Adjust for vertical alignment
+
+            // Draw text stroke
+            powerupCtx.strokeStyle = '#000000';
+            powerupCtx.lineWidth = 2 * (canvasSize / 40); // Scale stroke width
+            powerupCtx.strokeText(p.symbol, canvasSize / 2, symbolTextY);
+            // Draw text fill
+            powerupCtx.fillText(p.symbol, canvasSize / 2, symbolTextY);
+        }
 
         const nameElement = document.createElement('span');
         nameElement.textContent = p.name;
 
-        infoItem.appendChild(symbolElement);
+        infoItem.appendChild(powerupCanvas);
         infoItem.appendChild(nameElement);
         powerupInfoList.appendChild(infoItem);
+
+        // Add click listener to show description
+        infoItem.addEventListener('click', () => {
+            showPowerupDescription(p.type);
+        });
     });
+
+    // Add event listener for the close button
+    const closeButton = powerupDescriptionWindow.querySelector('#closePowerupDescription');
+    if (closeButton) {
+        closeButton.addEventListener('click', hidePowerupDescription);
+    }
 }
 
 export function showPowerupDescription(powerupType) {

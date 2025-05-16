@@ -1,5 +1,5 @@
 export const settings = {
-    brickPadding: 2, 
+    brickPadding: 3, 
     brickOffsetTop: 0, 
     paddleHeight: 16, 
     paddleWidth: 100, 
@@ -8,11 +8,11 @@ export const settings = {
     ballSpeedMultiplier: 1, // DEPRECATED: Replaced by activeSpeedModifier.
     ballDamage: 1, 
     randomPowerupChance: 0.07, 
-    extraLifeDropChance: 0.05, 
+    extraLifeDropChance: 0.025, 
     powerupSpeed: 1.5, 
     powerupDuration: 10000, 
     laserDuration: 8000, 
-    breakDuration: 8000, 
+    breakDuration: 16000, 
     slowDuration: 8000, 
     fastDuration: 8000, 
     slowBallFactor: 0.6, 

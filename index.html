@@ -44,6 +44,9 @@
                 <button id="resumeBtn" class="game-btn">RESUME</button>
                 <button id="restartBtn" class="game-btn">RESTART LEVEL</button>
                 <button id="menuBtn" class="game-btn">MAIN MENU</button>
+                <label>
+                    <input type="checkbox" id="soundToggle" checked> Sound On
+                </label>
             </div>
 
             <div id="gameOverScreen">
@@ -84,11 +87,14 @@
              <div id="infoScreen">
                  <h2 class="screen-title">HOW TO PLAY</h2>
                   <p style="margin-bottom: 20px; font-size: 1rem;">Break all the colored and silver bricks to clear the level!</p>
+                  <p style="margin-bottom: 10px; font-size: 1rem;">Power-ups:</p>
                   <div id="powerupInfoList">
-                      </div>
+                      <!-- Powerup items will be dynamically added here by JavaScript -->
+                  </div>
                    <div id="powerupDescriptionWindow">
                        <h4></h4>
                        <p></p>
+                       <button id="closePowerupDescription" class="game-btn" style="margin-top: 10px;">Close</button>
                    </div>
                   <button id="backToInfoMenuBtn" class="game-btn">BACK</button>
              </div>
