@@ -1,5 +1,5 @@
-import { gameState } from './game.js'; // Assuming gameState will be managed in game.js
-import { settings, powerupTypes } from './constants.js'; // For populatePowerupInfo and dev mode UI
+import { gameState, updateColorPalette, updateBaseBallSpeed } from './game.js'; // Assuming gameState will be managed in game.js
+import { settings, powerupTypes, colorPalettes } from './constants.js'; // For populatePowerupInfo and dev mode UI
 
 // --- DOM Element References ---
 export const canvas = document.getElementById('gameCanvas');
@@ -21,7 +21,7 @@ export const levelDisplay = document.getElementById('levelDisplay');
 export const aestheticDisplay = document.getElementById('aestheticDisplay');
 export const pauseBtn = document.getElementById('pauseBtn');
 export const highScoresList = document.getElementById('highScoresList');
-export const bossHPBar = document.getElementById('bossHPBar');
+// export const bossHPBar = document.getElementById('bossHPBar'); // Not used elsewhere
 // export const bossHPBarFill = document.getElementById('bossHPBarFill'); // Not used elsewhere
 export const levelCompleteMessage = document.getElementById('levelCompleteMessage');
 // export const laserBeamsContainer = document.getElementById('laserBeams'); // Visual container, not directly manipulated by JS logic for now
@@ -33,6 +33,12 @@ export const levelSelectContainer = document.getElementById('levelSelectContaine
 export const levelSelectLabel = document.querySelector('#levelSelectContainer label');
 export const powerupInfoList = document.getElementById('powerupInfoList');
 export const powerupDescriptionWindow = document.getElementById('powerupDescriptionWindow');
+
+// Add reference to color palette select dropdown
+export const colorPaletteSelect = document.getElementById('colorPaletteSelect');
+
+// Add reference to baseBallSpeed input
+export const baseBallSpeedInput = document.getElementById('baseBallSpeedInput');
 
 // UI Buttons (grouped for clarity)
 export const startBtn = document.getElementById('startBtn');
@@ -251,4 +257,61 @@ export function initialUISetup() {
     showScreen(startScreen); 
     updateBossHPBar(); // Ensure it's hidden initially
     if (levelSelectInput) levelSelectInput.value = 1; // Default level select
+    populateColorPaletteSelect(); // Populate the dropdown on initial setup
+    populateSettingsInputs(); // Populate settings inputs with current values
+    setupSettingsListeners(); // Setup listeners for settings inputs
+}
+
+// Function to populate settings inputs with current values
+export function populateSettingsInputs() {
+    if (baseBallSpeedInput) {
+        baseBallSpeedInput.value = settings.baseBallSpeed;
+    }
+    // Add other settings inputs here if needed later
+}
+
+// Function to set up event listeners for settings inputs
+export function setupSettingsListeners() {
+    if (baseBallSpeedInput) {
+        baseBallSpeedInput.addEventListener('change', (event) => {
+            const speed = parseFloat(event.target.value);
+            // Call game logic function to update speed and handle validation
+            // Assuming a function like updateBaseBallSpeed(speed) exists in game.js
+            console.log("Base Ball Speed changed to:", speed);
+            // Placeholder for calling game logic:
+            updateBaseBallSpeed(speed);
+        });
+    }
+    // Add other settings listeners here if needed later
+}
+
+// Function to populate the color palette select dropdown
+export function populateColorPaletteSelect() {
+    if (!colorPaletteSelect) {
+        console.error("Color palette select element (#colorPaletteSelect) not found!");
+        return;
+    }
+    colorPaletteSelect.innerHTML = ''; // Clear existing options
+
+    colorPalettes.forEach((palette, index) => {
+        const option = document.createElement('option');
+        option.value = index; // Use index as the value
+        option.textContent = palette.name;
+        colorPaletteSelect.appendChild(option);
+    });
+
+    // Set the initial selection to the current palette in gameState
+    colorPaletteSelect.value = gameState.currentColorPaletteIndex;
+
+    // Add event listener to handle palette changes
+    colorPaletteSelect.addEventListener('change', (event) => {
+        const selectedIndex = parseInt(event.target.value, 10);
+        // Call a function in game.js to update the color palette
+        // Assuming a function like updateColorPalette(selectedIndex) exists in game.js
+        // We'll need to add this function in game.js next.
+        // For now, we'll just log the change.
+        console.log("Color palette changed to index:", selectedIndex);
+        // Placeholder for calling game logic:
+        updateColorPalette(selectedIndex);
+    });
 } 

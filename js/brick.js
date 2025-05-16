@@ -1,15 +1,16 @@
-import { settings, standardBrickColors } from './constants.js';
+import { settings } from './constants.js';
 import { gameLevels } from './levels.js';
 import { paddle } from './paddle.js'; // For calculating available height for bricks
+import { gameState } from './game.js'; // Import gameState
 // gameState will be passed to functions needing level, bricks array, boss state, etc.
 
-// Helper function to map brick type values (1-7) to their corresponding standard brick color.
-function getStandardBrickColor(typeValue) {
+// Helper function to map brick type values (1-8) to their corresponding color from the current palette.
+function getStandardBrickColor(typeValue, currentPalette) {
     const colorIndex = (typeValue - 1); 
-    if (colorIndex >= 0 && colorIndex < standardBrickColors.length) {
-        return standardBrickColors[colorIndex];
+    if (currentPalette && currentPalette.colors && colorIndex >= 0 && colorIndex < currentPalette.colors.length) {
+        return currentPalette.colors[colorIndex];
     }
-    return '#FFFFFF'; // Default white
+    return '#FFFFFF'; // Default white if palette is not available or index is out of bounds
 }
 
 // Helper function to darken a given hex color by a specified amount (0-1).
@@ -190,7 +191,7 @@ export function initBricks(canvas, currentGameState) {
                 const originalColor = color; // Store original color for animation reference
 
                 if (brickType >= 1 && brickType <= 8) {
-                    color = getStandardBrickColor(brickType);
+                    color = getStandardBrickColor(brickType, currentGameState.currentPalette);
                     hp = 1;
                 } else if (brickType === 9) {
                     hp = 2 + Math.floor((currentGameState.level - 1) / 10);

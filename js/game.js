@@ -83,8 +83,8 @@ export function startGameAtLevel(levelNumber) {
     gameState.gameRunning = true;
     gameState.paused = false;
     
-    // Select color palette
-    gameState.currentColorPaletteIndex = (levelNumber - 1) % colorPalettes.length; 
+    // Select color palette - Now set by UI, ensure it's applied
+    // Removed: gameState.currentColorPaletteIndex = (levelNumber - 1) % colorPalettes.length; 
     gameState.currentPalette = colorPalettes[gameState.currentColorPaletteIndex];
 
     initCanvasAndPaddle(); // Initialize canvas size and paddle position
@@ -151,11 +151,11 @@ function startNextLevel() {
         return;
     }
 
-    // Cycle color palette
-    if (gameState.level > 1 && (gameState.level - 1) % 5 === 0) {
-        gameState.currentColorPaletteIndex = (gameState.currentColorPaletteIndex + 1) % colorPalettes.length;
-        gameState.currentPalette = colorPalettes[gameState.currentColorPaletteIndex];
-    }
+    // Color palette is now controlled by the settings menu, do not cycle by level
+    // Removed: if (gameState.level > 1 && (gameState.level - 1) % 5 === 0) {
+    // Removed:     gameState.currentColorPaletteIndex = (gameState.currentColorPaletteIndex + 1) % colorPalettes.length;
+    // Removed:     gameState.currentPalette = colorPalettes[gameState.currentColorPaletteIndex];
+    // Removed: }
 
     initCanvasAndPaddle(); // Re-init in case of resize between levels
     gameState.bricks = initBricks(UI.canvas, gameState);
@@ -675,4 +675,40 @@ export function initializeGame() {
     UI.updateDeveloperModeUIState(gameState.developerMode); // Update UI based on loaded state
     setupEventListeners();
     console.log("Game Initialized and Event Listeners Setup.");
+}
+
+// Function to update the color palette
+export function updateColorPalette(paletteIndex) {
+    if (paletteIndex >= 0 && paletteIndex < colorPalettes.length) {
+        gameState.currentColorPaletteIndex = paletteIndex;
+        gameState.currentPalette = colorPalettes[gameState.currentColorPaletteIndex];
+        console.log("Updated color palette to:", gameState.currentPalette.name);
+        // Re-initialize bricks with the new palette
+        if (UI.canvas && gameState.bricks.length > 0) { // Only re-initialize if bricks exist (game started)
+             // Note: Re-initializing bricks mid-game might reset brick state (HP, etc.)
+             // A more advanced approach would update existing brick colors without resetting state.
+             // For simplicity, we re-initialize, which is fine when selecting from settings before a level.
+            gameState.bricks = initBricks(UI.canvas, gameState); // Pass gameState which now has the new palette
+        }
+    } else {
+        console.error("Invalid color palette index:", paletteIndex);
+    }
+}
+
+// Function to update the base ball speed
+export function updateBaseBallSpeed(speed) {
+    const defaultSpeed = 4; // Get default from settings or define here
+    const newSpeed = parseFloat(speed);
+
+    if (!isNaN(newSpeed) && newSpeed > 0) {
+        settings.baseBallSpeed = newSpeed;
+        console.log("Updated baseBallSpeed to:", settings.baseBallSpeed);
+        // Optional: Re-initialize balls or adjust current ball speeds if needed mid-game
+        // For simplicity, the new speed will apply to newly created balls/levels.
+    } else {
+        console.warn("Invalid baseBallSpeed value provided:", speed, ". Value must be a number greater than 0.");
+        // Optionally revert the input field in the UI to the current valid value
+        // This would require passing the UI element or its update function here.
+        // For now, we just log the warning.
+    }
 } 
