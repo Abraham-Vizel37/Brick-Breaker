@@ -6,7 +6,7 @@
             touch-action: none;
         }
 
-        body {
+        body, html {
             font-family: Arial, sans-serif;
             background-color: #111;
             color: white;
@@ -16,12 +16,25 @@
             height: 100%;
         }
 
+        /* DESIGN INTENT: Main wrapper to use Flexbox for arranging game container and side cards. */
+        .main-game-wrapper {
+            display: flex;
+            justify-content: center; /* Center the game container horizontally */
+            align-items: stretch; /* Make children fill the height */
+            width: 100%;
+            height: 100%; /* Fill the full height of the body/viewport */
+            overflow: hidden; /* Hide overflow if side cards are too wide */
+        }
+
         /* DESIGN INTENT: Container to hold the game canvas and UI elements, providing relative positioning for overlay screens. */
         #gameContainer {
             position: relative;
             width: 100%;
+            max-width: 500px; /* Keep the max-width to limit game area size */
+            margin: 0; /* Remove auto margin as flexbox handles centering */
             height: 100%;
             overflow: hidden;
+             flex-shrink: 0; /* Prevent gameContainer from shrinking */
         }
 
         /* DESIGN INTENT: The main game rendering surface. Set to block display and full size to fill the container. z-index ensures it's layered correctly behind UI screens. */
@@ -29,7 +42,7 @@
             background-color: #111;
             display: block;
             width: 100%;
-            height: 100%;
+            height: auto;
             position: relative; /* Ensure position for z-index */
             z-index: 1; /* Ensure canvas is behind menu screens */
         }
@@ -309,4 +322,11 @@
                margin-bottom: 0;
                font-size: 0.9rem;
                color: #ccc;
+           }
+
+           /* DESIGN INTENT: Styling for the side cards that fill the extra horizontal space. */
+           .side-card {
+               flex-grow: 1; /* Allow the side cards to grow and fill available space */
+               background: linear-gradient(to bottom, #2a0000, #4d0000, #2a0000); /* Example gradient */
+               /* You can add more styling here for visual elements */
            } 

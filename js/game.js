@@ -433,10 +433,43 @@ function handleResize() {
 
 function initCanvasAndPaddle() {
     if (!UI.canvas) return;
-    UI.canvas.width = UI.canvas.offsetWidth;
-    UI.canvas.height = UI.canvas.offsetHeight;
-    initPaddle(UI.canvas); // Initialize paddle position based on new canvas size
-    console.log("Canvas initialized:", UI.canvas.width, UI.canvas.height);
+
+    // Change the target aspect ratio to a mobile-like shape (e.g., 9:16 width:height)
+    const targetAspectRatio = 9 / 16; // Desired width / height ratio (e.g., 9:16)
+
+    // Get the dimensions of the container or the available space from CSS
+    const containerWidth = UI.canvas.offsetWidth;
+    const containerHeight = UI.canvas.offsetHeight;
+
+    let newCanvasWidth;
+    let newCanvasHeight;
+
+    // Calculate dimensions based on fitting within the container while maintaining the aspect ratio
+    // We want: newCanvasWidth / newCanvasHeight = targetAspectRatio
+    // newCanvasHeight = newCanvasWidth / targetAspectRatio
+    // newCanvasWidth = newCanvasHeight * targetAspectRatio
+
+    // Option 1: Assume width is the constraint, calculate height
+    const heightBasedOnWidth = containerWidth / targetAspectRatio;
+
+    if (heightBasedOnWidth <= containerHeight) {
+        // Fitting based on width results in a height that fits the container
+        newCanvasWidth = containerWidth;
+        newCanvasHeight = heightBasedOnWidth;
+    } else {
+        // Fitting based on height is required (width based on height exceeds container width)
+        newCanvasHeight = containerHeight;
+        newCanvasWidth = containerHeight * targetAspectRatio;
+    }
+
+    // Set the internal drawing buffer size of the canvas
+    UI.canvas.width = newCanvasWidth;
+    UI.canvas.height = newCanvasHeight;
+
+    // Initialize paddle position based on the new canvas size
+    initPaddle(UI.canvas);
+
+    console.log("Canvas initialized with mobile-like ratio:", UI.canvas.width, UI.canvas.height);
 }
 
 // --- Laser Shooting ---
